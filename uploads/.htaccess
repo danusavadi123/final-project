@@ -1,0 +1,9 @@
+# Deny script execution
+<FilesMatch "\.(php|php5|php7|php8)$">
+    Deny from all
+</FilesMatch>
+
+# Allow images
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Allow from all
+</FilesMatch>

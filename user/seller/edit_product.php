@@ -1,64 +1,60 @@
 <?php
-// Edit Product - Sellers can update their product details
+include_once '../includes/session.php';
+include_once '../config/config.php';
+include_once '../config/database.php';
 
-include '../includes/session.php';
-checkRole('seller'); // Only sellers can access this page
-include '../config/database.php';
+redirectIfNotLoggedIn();
 
-// Check if product ID is provided
-if (!isset($_GET['id'])) {
-    $_SESSION['error'] = "Invalid product ID.";
-    header("Location: manage_products.php");
-    exit();
+if ($_SESSION['user_role'] !== 'seller') {
+    header("Location: " . BASE_URL . "/index.php");
+    exit;
 }
 
-$product_id = $_GET['id'];
 $seller_id = $_SESSION['user_id'];
+$product_id = $_GET['id'] ?? null;
 
-// Fetch product details
-$query = "SELECT * FROM products WHERE id = ? AND seller_id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("ii", $product_id, $seller_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$product = $result->fetch_assoc();
-
-// Redirect if product not found
-if (!$product) {
-    $_SESSION['error'] = "Product not found.";
+if (!$product_id) {
     header("Location: manage_products.php");
-    exit();
+    exit;
 }
+
+// Fetch the product data
+$stmt = $conn->prepare("SELECT * FROM products WHERE id = ? AND seller_id = ?");
+$stmt->execute([$product_id, $seller_id]);
+$product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$product) {
+    die("Product not found or unauthorized access.");
+}
+
+$message = "";
 
 // Handle form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = trim($_POST["name"]);
-    $description = trim($_POST["description"]);
-    $price = $_POST["price"];
-    $category = trim($_POST["category"]);
-    $location = trim($_POST["location"]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name        = $_POST['name'];
+    $category    = $_POST['category'];
+    $price       = $_POST['price'];
+    $description = $_POST['description'];
 
-    // Handle image upload (if updated)
-    if (!empty($_FILES["image"]["name"])) {
-        $target_dir = "../uploads/";
-        $image = time() . "_" . basename($_FILES["image"]["name"]);
-        $target_file = $target_dir . $image;
-        move_uploaded_file($_FILES["image"]["tmp_name"], $target_file);
+    // Handle image update if uploaded
+    if (!empty($_FILES['image']['name'])) {
+        $image_name = time() . '_' . $_FILES['image']['name'];
+        $image_path = '../uploads/' . $image_name;
+        move_uploaded_file($_FILES['image']['tmp_name'], $image_path);
     } else {
-        $image = $product['image']; // Keep the old image
+        $image_name = $product['image']; // keep old image
     }
 
-    // Update product in database
-    $update_query = "UPDATE products SET name=?, description=?, price=?, category=?, location=?, image=? WHERE id=? AND seller_id=?";
-    $stmt = $conn->prepare($update_query);
-    $stmt->bind_param("ssdsssii", $name, $description, $price, $category, $location, $image, $product_id, $seller_id);
+    $stmt = $conn->prepare("UPDATE products SET name = ?, category = ?, price = ?, description = ?, image = ? WHERE id = ? AND seller_id = ?");
+    $success = $stmt->execute([$name, $category, $price, $description, $image_name, $product_id, $seller_id]);
 
-    if ($stmt->execute()) {
-        $_SESSION['success'] = "Product updated successfully!";
-        header("Location: manage_products.php");
-        exit();
+    if ($success) {
+        $message = "Product updated successfully.";
+        // Refresh product data
+        $stmt->execute([$product_id, $seller_id]);
+        $product = $stmt->fetch(PDO::FETCH_ASSOC);
     } else {
-        $_SESSION['error'] = "Error updating product. Try again.";
+        $message = "Failed to update product.";
     }
 }
 ?>
@@ -66,51 +62,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Product</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <title>Edit Product</title>
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/bootstrap.min.css">
 </head>
 <body>
+<?php include '../includes/navbar.php'; ?>
 
-<div class="container mt-5">
-    <h2>Edit Product</h2>
+<div class="container my-5">
+  <h2 class="mb-4 text-center">Edit Product</h2>
 
-    <?php if (isset($_SESSION['error'])) { ?>
-        <div class="alert alert-danger"><?= $_SESSION['error']; unset($_SESSION['error']); ?></div>
-    <?php } ?>
+  <?php if ($message): ?>
+    <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
+  <?php endif; ?>
 
-    <form action="edit_product.php?id=<?= $product_id; ?>" method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="name" class="form-label">Product Name</label>
-            <input type="text" name="name" id="name" class="form-control" value="<?= htmlspecialchars($product['name']); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea name="description" id="description" class="form-control" required><?= htmlspecialchars($product['description']); ?></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="price" class="form-label">Price (₹)</label>
-            <input type="number" step="0.01" name="price" id="price" class="form-control" value="<?= $product['price']; ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <input type="text" name="category" id="category" class="form-control" value="<?= htmlspecialchars($product['category']); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="location" class="form-label">Location</label>
-            <input type="text" name="location" id="location" class="form-control" value="<?= htmlspecialchars($product['location']); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label for="image" class="form-label">Product Image</label>
-            <input type="file" name="image" id="image" class="form-control">
-            <p>Current Image: <img src="../uploads/<?= $product['image']; ?>" width="50" height="50"></p>
-        </div>
-        <button type="submit" class="btn btn-primary">Update Product</button>
-        <a href="manage_products.php" class="btn btn-secondary">Back to Manage Products</a>
-    </form>
+  <form action="" method="POST" enctype="multipart/form-data" class="mx-auto" style="max-width: 600px;">
+    <div class="mb-3">
+      <label for="name" class="form-label">Product Name</label>
+      <input type="text" name="name" id="name" class="form-control" value="<?= htmlspecialchars($product['name']) ?>" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="category" class="form-label">Category</label>
+      <input type="text" name="category" id="category" class="form-control" value="<?= htmlspecialchars($product['category']) ?>" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="price" class="form-label">Price (₹)</label>
+      <input type="number" name="price" id="price" step="0.01" class="form-control" value="<?= htmlspecialchars($product['price']) ?>" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea name="description" id="description" class="form-control" required><?= htmlspecialchars($product['description']) ?></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Current Image:</label><br>
+      <img src="<?= BASE_URL ?>/uploads/<?= htmlspecialchars($product['image']) ?>" width="100" height="100">
+    </div>
+
+    <div class="mb-3">
+      <label for="image" class="form-label">Change Image</label>
+      <input type="file" name="image" id="image" class="form-control">
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-success">Update Product</button>
+      <a href="manage_products.php" class="btn btn-secondary">Back</a>
+    </div>
+  </form>
 </div>
 
+<?php include '../includes/footer.php'; ?>
+<script src="<?= BASE_URL ?>/assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

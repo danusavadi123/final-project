@@ -1,103 +1,67 @@
 <?php
-// Checkout - Payment Processing
+require_once('../includes/session.php');
+require_once('../config/database.php');
 
-include '../includes/session.php';
-checkRole('buyer'); // Only buyers can access this page
-include '../config/database.php';
-require '../vendor/autoload.php'; // Include Razorpay SDK
-
-use Razorpay\Api\Api;
-
-// Razorpay API Credentials
-$api_key = "rzp_test_g6EblohbAvjqdg"; 
-$api_secret = "C1yySJ5jG6dxoShLB7brzuOL"; 
-
-$api = new Api($api_key, $api_secret);
-
-// Check if order ID is provided
-if (!isset($_GET['order_id'])) {
-    $_SESSION['error'] = "Invalid order.";
-    header("Location: ../buyer/order_history.php");
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'buyer') {
+    header("Location: ../auth/login.php");
     exit();
 }
 
-$order_id = $_GET['order_id'];
+if (!isset($_GET['order_id'])) {
+    die("Order ID not provided.");
+}
 
-// Fetch order details
-$query = "SELECT o.*, p.name AS product_name FROM orders o 
-          JOIN products p ON o.product_id = p.id WHERE o.id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $order_id);
+$order_id = intval($_GET['order_id']);
+$buyer_id = $_SESSION['user_id'];
+
+// Fetch order and buyer info
+$stmt = $conn->prepare("SELECT o.total_amount, o.razorpay_order_id, u.name, u.email 
+                        FROM orders o 
+                        JOIN users u ON o.buyer_id = u.id 
+                        WHERE o.id = ? AND o.buyer_id = ?");
+$stmt->bind_param("ii", $order_id, $buyer_id);
 $stmt->execute();
 $result = $stmt->get_result();
-$order = $result->fetch_assoc();
 
-// Redirect if order not found
-if (!$order) {
-    $_SESSION['error'] = "Order not found.";
-    header("Location: ../buyer/order_history.php");
-    exit();
+if ($result->num_rows == 0) {
+    die("Invalid order.");
 }
 
-// Create Razorpay Order
-$razorpay_order = $api->order->create([
-    'receipt' => "ORDER_" . $order_id,
-    'amount' => $order['total_price'] * 100, // Convert to paise
-    'currency' => 'INR',
-    'payment_capture' => 1
-]);
-
-$_SESSION['razorpay_order_id'] = $razorpay_order->id;
+$order = $result->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>Checkout - Razorpay</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
+    <h2>Redirecting to payment...</h2>
+    <script>
+        const options = {
+            "key": "rzp_test_YourApiKeyHere", // Replace with your Razorpay key
+            "amount": "<?php echo $order['total_amount'] * 100; ?>",
+            "currency": "INR",
+            "name": "Local Marketplace",
+            "description": "Purchase from local seller",
+            "order_id": "<?php echo $order['razorpay_order_id']; ?>",
+            "handler": function (response) {
+                // Redirect to success handler
+                window.location.href = "success.php?order_id=<?php echo $order_id; ?>&payment_id=" + response.razorpay_payment_id + "&signature=" + response.razorpay_signature;
+            },
+            "prefill": {
+                "name": "<?php echo htmlspecialchars($order['name']); ?>",
+                "email": "<?php echo htmlspecialchars($order['email']); ?>"
+            },
+            "theme": {
+                "color": "#3399cc"
+            }
+        };
 
-<div class="container mt-5">
-    <h2>Checkout</h2>
-
-    <p><strong>Product:</strong> <?= htmlspecialchars($order['product_name']); ?></p>
-    <p><strong>Amount:</strong> ₹<?= $order['total_price']; ?></p>
-
-    <button id="payBtn" class="btn btn-success">Pay Now</button>
-    <a href="../buyer/order_history.php" class="btn btn-secondary">Cancel</a>
-</div>
-
-<script>
-    var options = {
-        "key": "<?= $api_key; ?>", 
-        "amount": "<?= $order['total_price'] * 100; ?>",
-        "currency": "INR",
-        "name": "Local Marketplace",
-        "description": "Order Payment",
-        "order_id": "<?= $razorpay_order->id; ?>",
-        "handler": function (response) {
-            window.location.href = "success.php?order_id=<?= $order_id; ?>&payment_id=" + response.razorpay_payment_id;
-        },
-        "prefill": {
-            "name": "<?= $_SESSION['username']; ?>",
-            "email": "<?= $_SESSION['email']; ?>"
-        },
-        "theme": {
-            "color": "#3399cc"
-        }
-    };
-    
-    var rzp1 = new Razorpay(options);
-    document.getElementById('payBtn').onclick = function (e) {
-        rzp1.open();
-        e.preventDefault();
-    };
-</script>
-
+        const rzp = new Razorpay(options);
+        rzp.open();
+    </script>
 </body>
 </html>

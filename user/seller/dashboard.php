@@ -1,29 +1,76 @@
 <?php
-// Seller Dashboard
-include '../includes/session.php'; // Ensure user is logged in
-checkRole('seller'); // Restrict access to sellers only
+require_once('../includes/session.php');
+require_once('../includes/header.php');
+require_once('../includes/navbar.php');
+require_once('../config/database.php');
+
+// Restrict access to sellers only
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
+    header("Location: ../auth/login.php");
+    exit();
+}
+
+$seller_id = $_SESSION['user_id'];
+
+// Fetch total products added by seller
+$product_sql = "SELECT COUNT(*) AS total_products FROM products WHERE seller_id = ?";
+$product_stmt = $conn->prepare($product_sql);
+$product_stmt->bind_param("i", $seller_id);
+$product_stmt->execute();
+$product_result = $product_stmt->get_result()->fetch_assoc();
+
+// Fetch total orders for this seller
+$order_sql = "SELECT COUNT(*) AS total_orders, SUM(amount) AS total_earnings FROM orders WHERE seller_id = ?";
+$order_stmt = $conn->prepare($order_sql);
+$order_stmt->bind_param("i", $seller_id);
+$order_stmt->execute();
+$order_result = $order_stmt->get_result()->fetch_assoc();
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Dashboard</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body>
-
 <div class="container mt-5">
-    <h2>Welcome, <?= $_SESSION['username']; ?>!</h2>
-    <p>You are logged in as a Seller.</p>
+    <h3 class="mb-4">Seller Dashboard</h3>
 
-    <a href="add_product.php" class="btn btn-primary">Add Product</a>
-    <a href="manage_products.php" class="btn btn-secondary">Manage Products</a>
-    <a href="orders.php" class="btn btn-warning">View Orders</a>
-    <a href="../auth/logout.php" class="btn btn-danger">Logout</a>
+    <div class="row g-4">
+        <!-- Total Products -->
+        <div class="col-md-4">
+            <div class="card shadow border-start border-primary border-4">
+                <div class="card-body">
+                    <h5 class="card-title">Total Products</h5>
+                    <h2><?php echo $product_result['total_products']; ?></h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Orders -->
+        <div class="col-md-4">
+            <div class="card shadow border-start border-success border-4">
+                <div class="card-body">
+                    <h5 class="card-title">Total Orders</h5>
+                    <h2><?php echo $order_result['total_orders']; ?></h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Earnings -->
+        <div class="col-md-4">
+            <div class="card shadow border-start border-warning border-4">
+                <div class="card-body">
+                    <h5 class="card-title">Total Earnings</h5>
+                    <h2>₹<?php echo number_format($order_result['total_earnings'] ?? 0, 2); ?></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Future section: Quick Links -->
+    <div class="mt-5">
+        <h4>Quick Actions</h4>
+        <div class="d-flex gap-3 flex-wrap">
+            <a href="add_product.php" class="btn btn-outline-primary">Add New Product</a>
+            <a href="manage_products.php" class="btn btn-outline-success">Manage Products</a>
+            <a href="orders.php" class="btn btn-outline-dark">View Orders</a>
+        </div>
+    </div>
 </div>
 
-</body>
-</html>
+<?php require_once('../includes/footer.php'); ?>

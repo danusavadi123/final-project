@@ -1,107 +1,66 @@
 <?php
-// Place Order - Buyers can order products
+require_once('../includes/session.php');
+require_once('../config/database.php');
+require_once('../vendor/autoload.php'); // Razorpay autoload (install via composer)
 
-include '../includes/session.php';
-checkRole('buyer'); // Only buyers can access this page
-include '../config/database.php';
-
-// Check if product ID is provided
-if (!isset($_GET['product_id'])) {
-    $_SESSION['error'] = "Invalid product selection.";
-    header("Location: ../buyer/browse_products.php");
+// Ensure buyer is logged in
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'buyer') {
+    header("Location: ../auth/login.php");
     exit();
 }
 
-$product_id = $_GET['product_id'];
+// Razorpay API Keys
+$razorpay_api_key = "rzp_test_YourApiKeyHere";
+$razorpay_api_secret = "YourApiSecretHere";
 
-// Fetch product details
-$query = "SELECT p.*, u.id AS seller_id FROM products p 
-          JOIN users u ON p.seller_id = u.id WHERE p.id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $product_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$product = $result->fetch_assoc();
+use Razorpay\Api\Api;
 
-if (!$product) {
-    $_SESSION['error'] = "Product not found.";
-    header("Location: ../buyer/browse_products.php");
-    exit();
-}
-
-// Handle order submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $product_id = intval($_POST['product_id']);
+    $quantity = intval($_POST['quantity']);
+    $price = floatval($_POST['price']);
     $buyer_id = $_SESSION['user_id'];
+    $total_amount = $quantity * $price;
+
+    // Fetch product to get seller ID
+    $stmt = $conn->prepare("SELECT seller_id FROM products WHERE id = ?");
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows == 0) {
+        die("Product not found.");
+    }
+    $product = $result->fetch_assoc();
     $seller_id = $product['seller_id'];
-    $quantity = $_POST['quantity'];
-    $address = trim($_POST['address']);
-    $total_price = $product['price'] * $quantity;
 
-    // Validate input fields
-    if ($quantity <= 0 || empty($address)) {
-        $_SESSION['error'] = "Invalid quantity or address.";
-        header("Location: place_order.php?product_id=$product_id");
-        exit();
-    }
+    // Insert order in DB
+    $order_query = $conn->prepare("INSERT INTO orders (buyer_id, seller_id, product_id, quantity, total_amount, payment_status, order_status, created_at) 
+                                   VALUES (?, ?, ?, ?, ?, 'pending', 'processing', NOW())");
+    $order_query->bind_param("iiidi", $buyer_id, $seller_id, $product_id, $quantity, $total_amount);
+    $order_query->execute();
+    $order_id = $conn->insert_id;
 
-    // Insert order into database
-    $query = "INSERT INTO orders (buyer_id, seller_id, product_id, quantity, total_price, address) VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("iiiids", $buyer_id, $seller_id, $product_id, $quantity, $total_price, $address);
+    // Create Razorpay Order
+    $api = new Api($razorpay_api_key, $razorpay_api_secret);
+    $razorpayOrder = $api->order->create([
+        'receipt' => 'order_rcptid_' . $order_id,
+        'amount' => $total_amount * 100, // in paise
+        'currency' => 'INR',
+        'notes' => [
+            'buyer_id' => $buyer_id,
+            'order_id' => $order_id
+        ]
+    ]);
 
-    if ($stmt->execute()) {
-        $_SESSION['success'] = "Order placed successfully! Proceed to payment.";
-        header("Location: ../payments/checkout.php?order_id=" . $stmt->insert_id);
-        exit();
-    } else {
-        $_SESSION['error'] = "Error placing order. Try again.";
-    }
+    // Store Razorpay order ID for verification
+    $update = $conn->prepare("UPDATE orders SET razorpay_order_id = ? WHERE id = ?");
+    $update->bind_param("si", $razorpayOrder['id'], $order_id);
+    $update->execute();
+
+    // Redirect to checkout page
+    header("Location: ../payments/checkout.php?order_id=" . $order_id);
+    exit();
+} else {
+    header("Location: ../buyer/browse_products.php");
+    exit();
 }
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place Order</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body>
-
-<div class="container mt-5">
-    <h2>Place Order</h2>
-
-    <?php if (isset($_SESSION['error'])) { ?>
-        <div class="alert alert-danger"><?= $_SESSION['error']; unset($_SESSION['error']); ?></div>
-    <?php } ?>
-
-    <div class="row">
-        <div class="col-md-6">
-            <img src="../uploads/<?= $product['image']; ?>" class="img-fluid" alt="<?= htmlspecialchars($product['name']); ?>">
-        </div>
-        <div class="col-md-6">
-            <h4><?= htmlspecialchars($product['name']); ?></h4>
-            <p><strong>Price:</strong> ₹<?= $product['price']; ?></p>
-            <p><strong>Category:</strong> <?= htmlspecialchars($product['category']); ?></p>
-            <p><strong>Location:</strong> <?= htmlspecialchars($product['location']); ?></p>
-
-            <form action="place_order.php?product_id=<?= $product['id']; ?>" method="POST">
-                <div class="mb-3">
-                    <label for="quantity" class="form-label">Quantity</label>
-                    <input type="number" name="quantity" id="quantity" class="form-control" min="1" required>
-                </div>
-                <div class="mb-3">
-                    <label for="address" class="form-label">Delivery Address</label>
-                    <textarea name="address" id="address" class="form-control" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Confirm Order</button>
-                <a href="../buyer/browse_products.php" class="btn btn-secondary">Cancel</a>
-            </form>
-        </div>
-    </div>
-</div>
-
-</body>
-</html>
