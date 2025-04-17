@@ -2,7 +2,8 @@
 // login.php - Handles user login
 
 session_start();
-include '../config/database.php'; // Database connection
+include '../config/db.php'; // Database connection
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"]);
@@ -16,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Check if the user exists in the database
-    $query = "SELECT id, username, password, role FROM users WHERE email = ?";
+    $query = "SELECT id, name, password, role FROM users WHERE email = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -24,13 +25,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // If user found, verify the password
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($id, $username, $hashed_password, $role);
+        $stmt->bind_result($id, $name, $hashed_password, $role);
         $stmt->fetch();
 
         if (password_verify($password, $hashed_password)) {
             // Store user details in session
             $_SESSION["user_id"] = $id;
-            $_SESSION["username"] = $username;
+            $_SESSION["name"] = $name;
             $_SESSION["role"] = $role;
 
             // Redirect based on user role
@@ -66,6 +67,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <div class="container mt-5">
     <h2 class="text-center">Login</h2>
+    <?php if (isset($_GET['logout']) && $_GET['logout'] == 'success') {
+    echo '<p>You have successfully logged out.</p>';
+    }
+    ?>
 
     <?php if (isset($_SESSION['error'])) { ?>
         <div class="alert alert-danger"><?= $_SESSION['error']; unset($_SESSION['error']); ?></div>

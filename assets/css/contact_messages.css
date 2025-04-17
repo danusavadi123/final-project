@@ -1,0 +1,15 @@
+.message-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+.message-card h6 {
+    margin-bottom: 5px;
+}
+
+.message-card small {
+    color: #666;
+}

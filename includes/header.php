@@ -16,13 +16,13 @@ require_once __DIR__ . '/../config/config.php';
     <title>Local Marketplace | Home-Based Businesses</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="/home-business-platform/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="..assets/css/bootstrap.min.css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/home-business-platform/assets/css/style.css">
+    <link rel="stylesheet" href="..assets/css/style.css">
 
     <!-- Favicon -->
-    <link rel="icon" href="/home-business-platform/assets/images/favicon.png" type="image/png">
+    <link rel="icon" href="..assets/images/favicon.png" type="image/png">
 
     <!-- Meta -->
     <meta name="description" content="A Local Marketplace Platform for Home-Based Businesses to connect buyers and sellers.">

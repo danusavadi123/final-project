@@ -18,6 +18,5 @@ if ($conn->connect_error) {
 // Set character encoding
 $conn->set_charset("utf8");
 
-echo "Database connected successfully";
 
 ?>

@@ -1,0 +1,55 @@
+    .order-card {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 25px;
+      background-color: #fff;
+    }
+    .product-img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+    }
+    .status-tracker {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .status-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+    .status-step::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #ddd;
+      z-index: 0;
+    }
+    .status-step span {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      padding: 4px 8px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      display: inline-block;
+      font-size: 12px;
+    }
+    .active-step span {
+      background-color: #0d6efd;
+      color: white;
+      border-color: #0d6efd;
+    }
+    .cancelled-badge {
+      background-color: #dc3545 !important;
+    }
+    .no-orders {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }

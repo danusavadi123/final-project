@@ -7,13 +7,13 @@ include '../config/db.php'; // Include database connection
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST["username"]);
+    $name = trim($_POST["name"]);
     $email = trim($_POST["email"]);
     $password = $_POST["password"];
     $role = $_POST["role"]; // Role: buyer, seller
 
     // Validate inputs
-    if (empty($username) || empty($email) || empty($password) || empty($role)) {
+    if (empty($name) || empty($email) || empty($password) || empty($role)) {
         $_SESSION['error'] = "All fields are required.";
         header("Location: register.php");
         exit();
@@ -36,9 +36,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Insert user into database
-    $insert_query = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)";
+    $insert_query = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($insert_query);
-    $stmt->bind_param("ssss", $username, $email, $hashed_password, $role);
+    $stmt->bind_param("ssss", $name, $email, $hashed_password, $role);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Registration successful! Please log in.";
@@ -74,8 +74,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <form action="register.php" method="POST" class="mt-4">
         <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" name="username" id="username" class="form-control" required>
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" name="name" id="name" class="form-control" required>
         </div>
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
