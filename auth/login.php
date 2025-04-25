@@ -3,6 +3,7 @@
 
 session_start();
 include '../config/db.php'; // Database connection
+require_once('../includes/spinner.html');
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

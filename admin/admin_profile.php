@@ -1,8 +1,10 @@
 <?php
+require_once('../includes/spinner.html');
 require_once('../includes/session.php');
 require_once('../includes/header.php');
 require_once('./admin_navbar.php');
 require_once('../config/db.php');
+
 
 // Redirect if not logged in or not admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {

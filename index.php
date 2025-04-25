@@ -1,4 +1,5 @@
 <?php session_start(); ?>
+<?php require_once('./includes/spinner.html'); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,7 @@
   <!-- Bootstrap & Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheer" href="../assets/css/index.css">
+  <link rel="stylesheet" href="./assets/css/index.css">
 </head>
 <body>
 
@@ -52,8 +53,6 @@
     </div>
   </div>
 
-  
-
+<?php require_once('./includes/footer.php'); ?>
 </body>
 </html>
-<?php require_once('./includes/footer.php'); ?>

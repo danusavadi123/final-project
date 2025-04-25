@@ -2,6 +2,7 @@
 // register.php - Handles user registration
 
 include '../config/db.php'; // Include database connection
+require_once('../includes/spinner.html');
 
 // Start session to store user data
 session_start();
