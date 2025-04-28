@@ -74,8 +74,16 @@ if (isset($_SESSION['role'])) {
 
       <!-- Profile Dropdown -->
       <div class="dropdown" id="profile-dropdown">
-        <img src="https://a.storyblok.com/f/191576/1200x800/215e59568f/round_profil_picture_after_.webp"
-             alt="Profile" class="avatar" id="avatar">
+      <?php
+$firstLetter = '';
+if (isset($_SESSION['name']) && !empty($_SESSION['name'])) {
+    $firstLetter = strtoupper($_SESSION['name'][0]);
+}
+?>
+<div class="avatar" id="avatar">
+  <?= $firstLetter ?>
+</div>
+
         <div class="dropdown-menu" id="dropdown-menu">
           <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'buyer'): ?>
             <a href="../buyer/profile.php"><i class="fas fa-user"></i> Profile</a>

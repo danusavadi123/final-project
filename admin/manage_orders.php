@@ -11,17 +11,41 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// Handle status and expected delivery date update
+$message = '';
+$message_type = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'])) {
     $order_id = intval($_POST['order_id']);
     $status = $_POST['status'];
     $expected_delivery = $_POST['expected_delivery'];
 
-    $stmt = $conn->prepare("UPDATE orders SET order_status = ?, expected_delivery = ? WHERE id = ?");
-    $stmt->bind_param("ssi", $status, $expected_delivery, $order_id);
+    // Fetch the order_date first
+    $stmt = $conn->prepare("SELECT order_date FROM orders WHERE id = ?");
+    $stmt->bind_param("i", $order_id);
     $stmt->execute();
+    $stmt->bind_result($order_date);
+    $stmt->fetch();
     $stmt->close();
+
+    if ($expected_delivery >= $order_date) {
+        // Update if expected_delivery is valid
+        $stmt = $conn->prepare("UPDATE orders SET order_status = ?, expected_delivery = ? WHERE id = ?");
+        $stmt->bind_param("ssi", $status, $expected_delivery, $order_id);
+        if ($stmt->execute()) {
+            $message = "Order updated successfully!";
+            $message_type = "success";
+        } else {
+            $message = "Failed to update the order.";
+            $message_type = "error";
+        }
+        $stmt->close();
+    } else {
+        $message = "Expected Delivery Date cannot be before the Order Date.";
+        $message_type = "error";
+    }
 }
+
+
 
 // Filtering logic
 $status_filter = $_GET['status'] ?? '';
@@ -102,7 +126,12 @@ $result = $stmt->get_result();
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="date" name="expected_delivery" class="form-control form-control-sm" value="<?= htmlspecialchars($order['expected_delivery']) ?>">
+                                <input type="date" 
+       name="expected_delivery" 
+       class="form-control form-control-sm"
+       value="<?= htmlspecialchars($order['expected_delivery']) ?>"
+       min="<?= htmlspecialchars(date('Y-m-d', strtotime($order['order_date']))) ?>">
+
                                 </td>
                                 <td><?= date('d M Y', strtotime($order['order_date'])) ?></td>
                                 <td>
@@ -119,5 +148,13 @@ $result = $stmt->get_result();
         <div class="alert alert-warning">No orders found.</div>
     <?php endif; ?>
 </div>
+<?php if (!empty($message)): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            alert("<?= $message ?>");
+        });
+    </script>
+<?php endif; ?>
+
 
 <?php require_once('../includes/footer.php'); ?>

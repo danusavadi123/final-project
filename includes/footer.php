@@ -18,7 +18,7 @@
     background-color: #1a1a1a;
     color: #f0f0f0;
     padding: 20px 40px;
-    position: relative;
+    position: fixed;
     bottom: 0;
     width: 100%;
     font-family: 'Segoe UI', sans-serif;

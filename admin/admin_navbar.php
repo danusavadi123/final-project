@@ -41,21 +41,31 @@ if (session_status() === PHP_SESSION_NONE) {
             </ul>
 
             <!-- Profile dropdown -->
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                        <img src="https://a.storyblok.com/f/191576/1200x800/215e59568f/round_profil_picture_after_.webp" alt="Profile" class="rounded-circle me-2" width="32" height="32">
-                        <span class="text-capitalize">
-                            <?php echo isset($_SESSION['name']) ? $_SESSION['name'] : 'Admin'; ?>
-                        </span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="./admin_profile.php"><i class="fas fa-user me-2"></i>Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="/auth/logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
+           <!-- Profile dropdown -->
+<ul class="navbar-nav ms-auto">
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+            <?php
+            $firstLetter = '';
+            if (isset($_SESSION['name']) && !empty($_SESSION['name'])) {
+                $firstLetter = strtoupper($_SESSION['name'][0]);
+            }
+            ?>
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width:32px; height:32px; font-weight:bold;">
+              <?= $firstLetter ?>
+            </div>
+            <span class="text-capitalize">
+                <?php echo isset($_SESSION['name']) ? $_SESSION['name'] : 'Admin'; ?>
+            </span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="./admin_profile.php"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="../auth/logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+        </ul>
+    </li>
+</ul>
+
         </div>
     </div>
 </nav>
