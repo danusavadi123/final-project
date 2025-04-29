@@ -14,13 +14,22 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 // Handle product deletion
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $product_id = intval($_GET['delete']);
+
+    // First delete related orders
+    $stmt = $conn->prepare("DELETE FROM orders WHERE product_id = ?");
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $stmt->close();
+
+    // Then delete the product
     $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
     $stmt->bind_param("i", $product_id);
     $stmt->execute();
     $stmt->close();
-    header("Location: manage_products.php");
+
     exit();
 }
+
 
 // Category filter logic
 $category_filter = $_GET['category'] ?? '';

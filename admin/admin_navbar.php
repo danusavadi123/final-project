@@ -54,9 +54,6 @@ if (session_status() === PHP_SESSION_NONE) {
             <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width:32px; height:32px; font-weight:bold;">
               <?= $firstLetter ?>
             </div>
-            <span class="text-capitalize">
-                <?php echo isset($_SESSION['name']) ? $_SESSION['name'] : 'Admin'; ?>
-            </span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="./admin_profile.php"><i class="fas fa-user me-2"></i>Profile</a></li>
