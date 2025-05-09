@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       position: absolute;
       width: 100%;
       height: 100%;
-      background: url("../assets/images/istockphoto-1247569904-612x612.jpg") no-repeat center center/cover;
+      background: url("../assets/images/login2img.jpg") no-repeat center center/cover;
       background-color: #000;
       z-index: -1;
     }
