@@ -29,17 +29,16 @@ $order_result = $order_stmt->get_result()->fetch_assoc();
 ?>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<!-- Font Awesome CDN -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 /* Background Image */
 body {
-    background-image: url('../assets/images/background1.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: center;
+    background: linear-gradient(135deg, #6baed6, #eff3ff);
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* 3D Card Effect */
@@ -70,11 +69,11 @@ h2 {
 
 h3 {
     font-weight: 700;
-    color:rgb(255, 255, 255);
+    color: #000;
 }
 
 h4 {
-    color:rgb(255, 255, 255);
+    color:#000;
 }
 
 /* Quick Actions */
@@ -109,7 +108,7 @@ h4 {
         <div class="col-md-4">
             <div class="card card-3d border-start border-primary border-4 p-3">
                 <div class="card-body text-center">
-                    <i class="fas fa-box icon-3d"></i>
+                    <i class="fas fa-box icon-3d" ></i>
                     <h5 class="card-title">Total Products</h5>
                     <h2><?php echo $product_result['total_products']; ?></h2>
                 </div>
@@ -118,9 +117,9 @@ h4 {
 
         <!-- Total Orders -->
         <div class="col-md-4">
-            <div class="card card-3d border-start border-success border-4 p-3">
+            <div class="card card-3d border-start border-primary border-4 p-3">
                 <div class="card-body text-center">
-                    <i class="fas fa-shopping-cart icon-3d" style="color: #28a745;"></i>
+                    <i class="fas fa-shopping-cart icon-3d"></i>
                     <h5 class="card-title">Total Orders</h5>
                     <h2><?php echo $order_result['total_orders']; ?></h2>
                 </div>
@@ -129,9 +128,9 @@ h4 {
 
         <!-- Total Earnings -->
         <div class="col-md-4">
-            <div class="card card-3d border-start border-warning border-4 p-3">
+            <div class="card card-3d border-start border-primary border-4 p-3">
                 <div class="card-body text-center">
-                    <i class="fas fa-coins icon-3d" style="color: #ffc107;"></i>
+                    <i class="fas fa-coins icon-3d"></i>
                     <h5 class="card-title">Total Earnings</h5>
                     <h2>₹<?php echo number_format($order_result['total_earnings'] ?? 0, 2); ?></h2>
                 </div>
@@ -144,8 +143,8 @@ h4 {
         <h4>Quick Actions</h4>
         <div class="d-flex gap-3 flex-wrap">
             <a href="add_product.php" class="btn btn-outline-primary">Add New Product</a>
-            <a href="manage_products.php" class="btn btn-outline-danger">Manage Products</a>
-            <a href="orders.php" class="btn btn-outline-warning">View Orders</a>
+            <a href="manage_products.php" class="btn btn-outline-primary">Manage Products</a>
+            <a href="orders.php" class="btn btn-outline-primary">View Orders</a>
         </div>
     </div>
 </div>

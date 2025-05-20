@@ -8,21 +8,18 @@
       font-family: Arial, sans-serif;
     }
 
-    /* Navbar styles */
     .navbar {
+      width: 100vw;
       background-color: #f8f9fa;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 20px;
       position: fixed;
       top: 0;
+      left:0;
       z-index: 999;
     }
 
-    .navbar-brand img {
-      width: 40px;
-    }
 
     .menu-toggle {
       display: none;
@@ -92,7 +89,7 @@
     .avatar {
       width: 40px;
       height: 40px;
-      background-color: #007bff; /* Blue background */
+      background-color: #3182bd; /* Blue background */
       color: #fff;               /* White letter */
       border-radius: 50%;
       display: flex;

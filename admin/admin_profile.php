@@ -5,7 +5,6 @@ require_once('../includes/header.php');
 require_once('./admin_navbar.php');
 require_once('../config/db.php');
 
-
 // Redirect if not logged in or not admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../auth/login.php");
@@ -57,9 +56,108 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<div class="container mt-5">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #eff3ff, #c6dbef);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 50px;
+        }
+
+         .navbar-custom {
+        position : fixed;
+        top : 0;
+        width : 100%;
+        z-index: 1000;
+    }
+    
+
+        h2 {
+            font-weight: 700;
+            text-align: center;
+            margin: 30px auto;
+            color: #08519c;
+        }
+
+        .card {
+            border: 1px solid #c6dbef;
+            border-radius: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+             padding-top : 3rem;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            background-color: #3182bd;
+            color: #ffffff;
+            padding: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: #08519c;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            border: 1px solid #c6dbef;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #6baed6;
+            box-shadow: 0 0 10px rgba(49, 130, 189, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3182bd, #6baed6);
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            padding: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(49, 130, 189, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #08519c, #3182bd);
+            box-shadow: 0 10px 25px rgba(49, 130, 189, 0.6);
+            transform: scale(1.03);
+        }
+
+        .alert {
+            border-radius: 12px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        strong {
+            color: #08519c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
     <h2>Admin Profile</h2>
     <hr>
 
@@ -71,9 +169,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="row">
         <!-- Profile Info -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-dark text-white">Profile Details</div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">Profile Details</div>
                 <div class="card-body">
                     <p><strong>Name:</strong> <?php echo htmlspecialchars($admin['name']); ?></p>
                     <p><strong>Email:</strong> <?php echo htmlspecialchars($admin['email']); ?></p>
@@ -86,22 +184,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Change Password -->
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header bg-dark text-white">Change Password</div>
+                <div class="card-header">Change Password</div>
                 <div class="card-body">
                     <form method="POST">
                         <div class="mb-3">
-                            <label>Current Password</label>
-                            <input type="password" name="current_password" class="form-control" required>
+                            <label for="current_password">Current Password</label>
+                            <input type="password" id="current_password" name="current_password" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label>New Password</label>
-                            <input type="password" name="new_password" class="form-control" required>
+                            <label for="new_password">New Password</label>
+                            <input type="password" id="new_password" name="new_password" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label>Confirm New Password</label>
-                            <input type="password" name="confirm_password" class="form-control" required>
+                            <label for="confirm_password">Confirm New Password</label>
+                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Update Password</button>
+                        <button type="submit" class="btn btn-primary w-100">Update Password</button>
                     </form>
                 </div>
             </div>
@@ -110,3 +208,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <?php require_once('../includes/footer.php'); ?>
+</body>
+</html>

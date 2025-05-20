@@ -164,7 +164,7 @@ document.addEventListener('click', (e) => {
                                   <p><strong>Order #${order.id}</strong></p>
                                   <p>Product: ${order.product_name}</p>
                                   <p>Quantity: ${order.quantity}</p>
-                                  <button class="update-status" data-id="${order.id}">Mark as Processed</button>
+                                  <button class="update-status btn btn-outline-primary" data-id="${order.id}">Mark as Processed</button>
                               </div>
                           `);
                           $j('#notification-items').append(orderEl);
@@ -183,13 +183,14 @@ document.addEventListener('click', (e) => {
       });
   }
   
+  
     
   
     // Handle status update
     notificationItems.on("click", ".update-status", function () {
       const orderId = $j(this).data("id");
       $j.ajax({
-        url: '../orders/order_status.php',
+        url: '../seller/order_status.php',
         method: 'POST',
         data: { id: orderId, status: 'Processed' },
         success: function () {

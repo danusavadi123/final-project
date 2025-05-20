@@ -1,65 +1,85 @@
 <?php
-require_once('../includes/session.php');
-require_once('../config/database.php');
+session_start();
+require_once('../config/db.php');
+require_once('../vendor/autoload.php'); // Razorpay PHP SDK
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'buyer') {
-    header("Location: ../auth/login.php");
-    exit();
+use Razorpay\Api\Api;
+
+// Check if razorpay_order and phone exist in session
+if (
+    !isset($_SESSION['razorpay_order']) ||
+    !isset($_SESSION['razorpay_order']['total_amount']) ||
+    !isset($_SESSION['phone'])
+) {
+    // Optional: clear session data to avoid looping
+    unset($_SESSION['razorpay_order']);
+    unset($_SESSION['razorpay_order_id']);
+    exit;
 }
 
-if (!isset($_GET['order_id'])) {
-    die("Order ID not provided.");
+$razorpayData = $_SESSION['razorpay_order'];
+$totalAmount = (int) $razorpayData['total_amount'] * 100; // Razorpay uses paise
+
+// Razorpay credentials (use env or config ideally)
+$apiKey = 'rzp_test_ODxanSFZcvxcbR';
+$apiSecret = 'HlRYDe9RT6QqwBch2BTAMSUF';
+
+// Create Razorpay API instance
+$api = new Api($apiKey, $apiSecret);
+
+// Try creating the Razorpay order
+try {
+    $razorpayOrder = $api->order->create([
+        'receipt' => 'ORDER_' . rand(1000, 9999),
+        'amount' => $totalAmount,
+        'currency' => 'INR',
+        'payment_capture' => 1
+    ]);
+
+    $_SESSION['razorpay_order_id'] = $razorpayOrder['id'];
+
+} catch (Exception $e) {
+    // Handle API error gracefully
+    echo "<script>alert('Failed to initialize payment. Please try again.'); window.location.href='../checkout/fallback.php';</script>";
+    exit;
 }
 
-$order_id = intval($_GET['order_id']);
-$buyer_id = $_SESSION['user_id'];
-
-// Fetch order and buyer info
-$stmt = $conn->prepare("SELECT o.total_amount, o.razorpay_order_id, u.name, u.email 
-                        FROM orders o 
-                        JOIN users u ON o.buyer_id = u.id 
-                        WHERE o.id = ? AND o.buyer_id = ?");
-$stmt->bind_param("ii", $order_id, $buyer_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows == 0) {
-    die("Invalid order.");
+// Safe HTML encoding
+function h($str) {
+    return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
 
-$order = $result->fetch_assoc();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Checkout - Razorpay</title>
+    <title>Redirecting to Razorpay...</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
-    <h2>Redirecting to payment...</h2>
     <script>
         const options = {
-            "key": "rzp_test_YourApiKeyHere", // Replace with your Razorpay key
-            "amount": "<?php echo $order['total_amount'] * 100; ?>",
+            "key": "<?= h($apiKey) ?>",
+            "amount": "<?= h($totalAmount) ?>",
             "currency": "INR",
-            "name": "Local Marketplace",
-            "description": "Purchase from local seller",
-            "order_id": "<?php echo $order['razorpay_order_id']; ?>",
+            "name": "Bazaar E-commerce",
+            "description": "Order Payment",
+            "image": "https://yourdomain.com/logo.png", // Optional logo
+            "order_id": "<?= h($razorpayOrder['id']) ?>",
             "handler": function (response) {
-                // Redirect to success handler
-                window.location.href = "success.php?order_id=<?php echo $order_id; ?>&payment_id=" + response.razorpay_payment_id + "&signature=" + response.razorpay_signature;
+                // On successful payment
+                window.location.href = "./verify.php?payment_id=" + response.razorpay_payment_id;
             },
             "prefill": {
-                "name": "<?php echo htmlspecialchars($order['name']); ?>",
-                "email": "<?php echo htmlspecialchars($order['email']); ?>"
+                "name": "<?= h($_SESSION['username'] ?? 'Customer') ?>",
+                "email": "<?= h($_SESSION['email'] ?? 'test@example.com') ?>",
+                "contact": "<?= h($_SESSION['phone']) ?>"
             },
             "theme": {
-                "color": "#3399cc"
+                "color": "#3182bd"
             }
         };
-
         const rzp = new Razorpay(options);
         rzp.open();
     </script>

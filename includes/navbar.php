@@ -24,10 +24,10 @@ if (isset($_SESSION['role'])) {
 
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="navbar-brand">
+  <div class="logo-img">
     <a href="<?= $homeLink ?>">
-    <img src="https://th.bing.com/th/id/OIP.LM6h3c-xBHaRRhWKVBNYAAAAAA?rs=1&pid=ImgDetMain" alt="Logo">
-    </a>
+  <img src="../assets/images/logo.png" alt="Logo" width="110" height="80" >
+  </a>
   </div>
 
   <div class="menu-toggle" id="menu-toggle">
@@ -107,7 +107,7 @@ if (isset($_SESSION['name']) && !empty($_SESSION['name'])) {
     <h2>Your Cart</h2>
     <div id="cart-items"></div>
     <div class="cart-actions">
-      <a href="../orders/place_order.php" class="btn btn-success">Order</a>
+      <a href="./place_order.php" class="btn btn-success">Order</a>
     </div>
   </div>
 </div>

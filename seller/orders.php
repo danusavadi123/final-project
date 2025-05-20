@@ -14,10 +14,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
 $seller_id = $_SESSION['user_id'];
 $message = "";
 
-// Fetch orders
+// Fetch orders with contact_number and payment_method
 $query = "
     SELECT o.id AS order_id, o.product_id, o.quantity, o.total_amount, o.order_status, o.order_date,
-           p.name AS product_name, b.name AS buyer_name, b.email AS buyer_email
+           o.payment_method, o.contact_number,
+           p.name AS product_name, 
+           b.name AS buyer_name, b.email AS buyer_email
     FROM orders o
     JOIN products p ON o.product_id = p.id
     JOIN users b ON o.buyer_id = b.id
@@ -33,7 +35,8 @@ $result = $stmt->get_result();
 <!-- 3D Glass Style -->
 <style>
 body {
-    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+     background: linear-gradient(135deg, #6baed6, #eff3ff);
+     min-height: 100vh;
 }
 
 .container {
@@ -66,7 +69,7 @@ h3 {
 }
 
 .table th {
-    background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+    background:  #3182bd;
     color: #fff;
     border: none;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -97,7 +100,7 @@ tr:hover td {
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <div class="container mt-5">
-    <h3>📦 Your Product Orders</h3>
+    <h3>Your Product Orders</h3>
     <?php echo $message; ?>
 
     <div class="table-container">
@@ -108,8 +111,10 @@ tr:hover td {
                     <th>Product</th>
                     <th>Buyer</th>
                     <th>Email</th>
+                    <th>Contact No.</th>
                     <th>Qty</th>
                     <th>Total (₹)</th>
+                    <th>Payment</th>
                     <th>Status</th>
                     <th>Ordered On</th>
                 </tr>
@@ -122,8 +127,10 @@ tr:hover td {
                         <td><?php echo htmlspecialchars($row['product_name']); ?></td>
                         <td><?php echo htmlspecialchars($row['buyer_name']); ?></td>
                         <td><?php echo htmlspecialchars($row['buyer_email']); ?></td>
+                        <td><?php echo htmlspecialchars($row['contact_number'] ?? ''); ?></td>
                         <td><?php echo $row['quantity']; ?></td>
                         <td><?php echo number_format($row['total_amount'], 2); ?></td>
+                        <td><?php echo ucfirst($row['payment_method']); ?></td>
                         <td>
                             <span class="badge 
                                 <?php 
@@ -138,7 +145,7 @@ tr:hover td {
                     </tr>
                 <?php endwhile; ?>
             <?php else: ?>
-                <tr><td colspan="8" class="text-center">No orders found.</td></tr>
+                <tr><td colspan="10" class="text-center">No orders found.</td></tr>
             <?php endif; ?>
             </tbody>
         </table>

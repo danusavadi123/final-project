@@ -30,8 +30,7 @@ if ($seller_result && mysqli_num_rows($seller_result) > 0) {
     $seller_name = $seller_data['name'];
 }
 
-
-// Get similar products (same category, excluding current product)
+// Get similar products
 $category = $product['category'];
 $similar_query = "SELECT * FROM products WHERE category = '$category' AND id != $product_id LIMIT 4";
 $similar_result = mysqli_query($conn, $similar_query);
@@ -44,122 +43,135 @@ $similar_result = mysqli_query($conn, $similar_query);
   <title><?= htmlspecialchars($product['name']) ?> - Product Details</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fafb;
+    }
+
     .product-image {
       width: 100%;
       max-height: 400px;
       object-fit: contain;
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
     }
+
     .product-price {
-      font-size: 1.4rem;
-      font-weight: bold;
+      font-size: 1.3rem;
+      font-weight: 700;
     }
+
     .product-discount {
-      color: green;
+      color: #2e7d32;
       font-weight: 500;
     }
+
+    .btn-outline-primary,
+    .btn-success {
+      border-radius: 50px;
+    }
+
+    .similar-products .card {
+      transition: transform 0.3s ease-in-out;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .similar-products .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    }
+
     .similar-products .card-img-top {
       height: 180px;
       object-fit: contain;
+      background: #f8f9fa;
     }
-    .similar-products .card:hover {
-      transform: scale(1.02);
-      transition: 0.3s;
+
+    .quantity-input-group {
+      max-width: 200px;
+    }
+
+    @media (max-width: 576px) {
+      .product-price {
+        font-size: 1.1rem;
+      }
     }
   </style>
 </head>
 <body>
 
 <div class="container my-5">
-  <div class="row">
+  <div class="row g-5">
     <div class="col-md-5">
-      <img src="../uploads/<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="product-image img-fluid border">
+      <img src="../uploads/<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="product-image img-fluid">
     </div>
     <div class="col-md-7">
-      <h2><?= htmlspecialchars($product['name']) ?></h2>
+      <h2 class="fw-bold"><?= htmlspecialchars($product['name']) ?></h2>
       <p class="text-muted">Sold by: <strong><?= htmlspecialchars($seller_name) ?></strong></p>
-      <p class="text-muted"><?= htmlspecialchars($product['description']) ?></p>
-      <?php
-         $originalPrice = $product['price'];
-         $discount = $product['discount'];
-         $finalPrice = $originalPrice - ($originalPrice * $discount / 100);
-      ?>
+      <p><?= htmlspecialchars($product['description']) ?></p>
 
-         <p class="mb-1">
-            <span class="text-muted text-decoration-line-through">₹<?= number_format($originalPrice, 2) ?></span>
-            <span class="fw-bold text-danger ms-2">₹<?= number_format($finalPrice, 2) ?></span>
-        </p>
-        <p class="product-discount">You save <?= $discount ?>%</p>
-        
+      <?php
+        $originalPrice = $product['price'];
+        $discount = $product['discount'];
+        $finalPrice = $originalPrice - ($originalPrice * $discount / 100);
+      ?>
+      <p class="mb-1">
+        <span class="text-muted text-decoration-line-through">₹<?= number_format($originalPrice, 2) ?></span>
+        <span class="text-danger ms-2 product-price">₹<?= number_format($finalPrice, 2) ?></span>
+      </p>
+      <p class="product-discount">You save <?= $discount ?>%</p>
 
       <div class="mt-4">
-      <form action="add_to_cart.php" method="POST" class="mb-3">
-  <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-  
-  <div class="input-group mb-3" style="max-width: 200px;">
-  <button class="btn btn-outline-secondary" type="button" id="decreaseQty">−</button>
-  <input type="number" name="quantity" value="1" min="1" max="99" class="form-control text-center" id="quantityInput" required>
-  <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
-</div>
+        <form action="add_to_cart.php" method="POST" class="mb-3">
+          <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+          <div class="input-group quantity-input-group mb-3">
+            <button class="btn btn-outline-secondary" type="button" id="decreaseQty">−</button>
+            <input type="number" name="quantity" value="1" min="1" max="99" class="form-control text-center" id="quantityInput" required>
+            <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
+          </div>
+          <button type="submit" class="btn btn-outline-primary w-50">Add to Cart</button>
+        </form>
 
-
-  <button type="submit" class="btn btn-outline-primary mt-2">Add to Cart</button>
-</form>
-
-<form action="../orders/place_order.php" method="GET">
-  <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-  <input type="hidden" name="quantity" value="1" id="order-now-qty">
-  <button type="submit" class="btn btn-success">Order Now</button>
-</form>
+        <form action="./place_order.php" method="GET">
+          <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+          <input type="hidden" name="quantity" value="1" id="order-now-qty">
+          <button type="submit" class="btn btn-success w-50">Order Now</button>
+        </form>
       </div>
     </div>
   </div>
 
   <?php if (mysqli_num_rows($similar_result) > 0): ?>
-  <hr class="my-5">
-  <h4>Similar Products</h4>
-  <div class="row similar-products">
-    <?php while ($similar = mysqli_fetch_assoc($similar_result)): ?>
-    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-      <div class="card h-100">
-        <img src="../uploads/<?= htmlspecialchars($similar['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($similar['name']) ?>">
-        <div class="card-body">
-          <h6 class="card-title"><?= htmlspecialchars($similar['name']) ?></h6>
-          <p class="product-price">₹<?= $similar['price'] ?></p>
-          <p class="product-discount">Discount: <?= $similar['discount'] ?>%</p>
-          <a href="product_details.php?id=<?= $similar['id'] ?>" class="btn btn-sm btn-outline-primary w-100">View</a>
+    <hr class="my-5">
+    <h4 class="mb-4">Similar Products</h4>
+    <div class="row similar-products">
+      <?php while ($similar = mysqli_fetch_assoc($similar_result)): ?>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+          <div class="card">
+            <img src="../uploads/<?= htmlspecialchars($similar['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($similar['name']) ?>">
+            <div class="card-body d-flex flex-column justify-content-between">
+              <h6 class="card-title"><?= htmlspecialchars($similar['name']) ?></h6>
+              <p class="product-price mb-1">₹<?= number_format($similar['price'], 2) ?></p>
+              <p class="product-discount mb-2">Discount: <?= $similar['discount'] ?>%</p>
+              <a href="product_details.php?id=<?= $similar['id'] ?>" class="btn btn-sm btn-outline-primary mt-auto w-100">View</a>
+            </div>
+          </div>
         </div>
-      </div>
+      <?php endwhile; ?>
     </div>
-    <?php endwhile; ?>
-  </div>
   <?php endif; ?>
 </div>
 
-  <script>
-     var $j = jQuery.noConflict();
-  $j("form[action='add_to_cart.php']").submit(function (e) {
-  e.preventDefault();
-  var form = $j(this);
-  var productId = form.find("input[name='product_id']").val();
-  var quantity = form.find("input[name='quantity']").val();
-
-  $j.ajax({
-    url: "../buyer/cart_handler.php?action=add",
-    method: "POST",
-    data: { product_id: productId, quantity: quantity },
-    success: function (res) {
-      if (res.status === 'success') {
-        $j("#cart-count").text(res.count);
-      }
-    }
-  });
-});
-
+<script>
   const qtyInput = document.getElementById('quantityInput');
   const increaseBtn = document.getElementById('increaseQty');
   const decreaseBtn = document.getElementById('decreaseQty');
-  const orderNowQty = document.getElementById('order-now-qty'); // sync hidden input
+  const orderNowQty = document.getElementById('order-now-qty');
 
   increaseBtn.addEventListener('click', () => {
     let value = parseInt(qtyInput.value);
@@ -179,6 +191,26 @@ $similar_result = mysqli_query($conn, $similar_query);
 
   qtyInput.addEventListener('input', () => {
     orderNowQty.value = qtyInput.value;
+  });
+
+  // AJAX Add to Cart
+  document.querySelector("form[action='add_to_cart.php']").addEventListener('submit', function (e) {
+    e.preventDefault();
+    const form = this;
+    const productId = form.querySelector("input[name='product_id']").value;
+    const quantity = form.querySelector("input[name='quantity']").value;
+
+    fetch("../buyer/cart_handler.php?action=add", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `product_id=${productId}&quantity=${quantity}`
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        document.getElementById("cart-count").textContent = data.count;
+      }
+    });
   });
 </script>
 
