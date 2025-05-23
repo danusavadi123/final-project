@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 20, 2025 at 04:49 PM
+-- Generation Time: May 23, 2025 at 12:28 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -52,15 +52,6 @@ CREATE TABLE `contact_messages` (
   `role` enum('buyer','seller') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `contact_messages`
---
-
-INSERT INTO `contact_messages` (`id`, `name`, `email`, `message`, `created_at`, `role`) VALUES
-(1, 'Harish Patil', 'harish@gmail.com', 'hi i want be a varifyed seller on your website.', '2025-04-17 16:15:48', 'seller'),
-(2, 'taruk', 'tarukjagirdar@gmail.com', 'hyyyy', '2025-04-29 01:12:42', 'buyer'),
-(3, '', '', '', '2025-05-18 19:23:29', 'buyer');
-
 -- --------------------------------------------------------
 
 --
@@ -88,17 +79,8 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `product_id`, `seller_id`, `buyer_id`, `quantity`, `total_amount`, `address`, `order_status`, `order_date`, `expected_delivery`, `payment_method`, `payment_id`, `contact_number`) VALUES
-(4, 1, 3, 2, 1, 89.10, 'Hanuman Nagar, Mudhol, 587313', 'Shipped', '2025-04-17 10:04:53', '2025-02-04', 'COD', NULL, NULL),
-(5, 2, 3, 2, 1, 94.05, 'janata plot, mudhol, 587313', 'Cancelled', '2025-04-25 04:52:59', NULL, 'COD', NULL, NULL),
-(6, 3, 3, 5, 1, 180.00, 'bldea, jkd, 587313', 'Delivered', '2025-04-26 09:57:06', '2025-04-29', 'COD', NULL, NULL),
-(13, 17, 11, 13, 1, 294.00, 'bldea college, jamakhandi, 587314', 'Pending', '2025-05-14 07:25:06', NULL, 'COD', NULL, NULL),
-(14, 17, 11, 13, 1, 294.00, 'bldea college, jamakhandi, 587314', 'Pending', '2025-05-14 07:25:12', NULL, 'COD', NULL, NULL),
-(15, 16, 11, 2, 1, 960.00, 'janata plot, mudhol, 587313', 'Pending', '2025-05-19 08:07:31', NULL, 'COD', NULL, NULL),
-(16, 2, 3, 2, 1, 5.00, 'mudhol, mudhol, 587313', 'Cancelled', '2025-05-20 03:53:35', NULL, 'COD', NULL, NULL),
-(18, 2, 3, 2, 1, 5.00, 'mudhol, mudhol, 587313', 'Cancelled', '2025-05-20 04:48:36', NULL, 'COD', NULL, '9380355801'),
-(19, 17, 11, 2, 1, 294.00, 'mudhol, mudhol, 587313', 'Pending', '2025-05-20 05:07:11', NULL, 'COD', NULL, '9380355801'),
-(20, 2, 3, 2, 1, 5.00, 'mudhol, mudhol, 587313', 'Pending', '2025-05-20 05:34:52', NULL, 'COD', NULL, '9380355801'),
-(21, 8, 11, 2, 1, 499.50, 'mudhol, mudhol, 587313', 'Cancelled', '2025-05-20 09:48:27', NULL, 'COD', NULL, '9380355801');
+(29, 28, 16, 15, 1, 632.70, 'Ram Mandir jamkhandi, jamkhandi - 587301', 'Pending', '2025-05-23 10:18:36', '2025-05-28', 'Razorpay', 'pay_QYImfgBrO61vX9', '4567894312'),
+(30, 55, 19, 15, 1, 380.00, 'buvi galli, jamakhandi - 587301', 'Shipped', '2025-05-23 12:23:08', '2025-05-24', 'Razorpay', 'pay_QYKtqBaAFX9GRx', '8088192805');
 
 -- --------------------------------------------------------
 
@@ -123,20 +105,52 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `seller_id`, `name`, `description`, `price`, `category`, `image`, `created_at`, `discount`) VALUES
-(1, 3, 'hand made diyas', 'we provide different types and design of diyas.', 99.00, 'Crafts', 'OIP.jpg', '2025-04-11 15:33:01', 10),
-(2, 3, 'Jumka', 'jumka or traditional Look', 5.00, 'Jewelry', 'jumka.jpg', '2025-04-25 02:51:09', 0),
-(3, 3, 'cake', 'cake', 200.00, 'Cakes', 'jumka.jpg', '2025-04-26 07:51:27', 10),
-(5, 10, 'jumkha', 'jumkha', 500.00, 'Jewelry', 'jumka.jpg', '2025-05-05 12:54:58', 5),
-(8, 11, 't shirt', 'mens daily wear tshirt', 555.00, 'Clothing', 'sweatshirt.jpg', '2025-05-14 04:53:50', 10),
-(9, 11, 'white', 'white cake', 999.00, 'Cakes', 'white.jpg', '2025-05-14 04:54:23', 5),
-(10, 11, 'walldesign', 'a best wall design', 260.00, 'Crafts', 'walldesign.jpg', '2025-05-14 04:55:01', 2),
-(11, 11, 'paper craft', 'paper craft', 199.00, 'Crafts', 'paper craft.jpg', '2025-05-14 04:55:31', 2),
-(12, 11, 'black forest', 'black cake', 1200.00, 'Cakes', 'black forest.jpg', '2025-05-14 04:56:11', 2),
-(13, 11, 'women one piece', 'women one piece', 2000.00, 'Clothing', 'womens one peice.jpg', '2025-05-14 04:57:00', 10),
-(14, 11, 'women a line piece', 'women', 1500.00, 'Clothing', 'a line piece.jpg', '2025-05-14 04:57:53', 10),
-(15, 11, 'white stone', 'white stone jewelry', 700.00, 'Jewelry', 'white stone.jpg', '2025-05-14 05:01:20', 2),
-(16, 11, 'wedding jewelry', 'a perfect wedding jewelry', 1000.00, 'Jewelry', 'wedding jewelry.jpg', '2025-05-14 05:02:06', 4),
-(17, 11, 'chain', 'a perfect chain', 300.00, 'Jewelry', 'perfect chain.jpg', '2025-05-14 05:02:48', 2);
+(19, 16, 'sweat shirt', 'winter wear | sweat shirt for unisex', 549.00, 'Clothing', 'sweat shirt.avif', '2025-05-23 07:52:16', 10),
+(20, 16, 'gym wear', 'gym wear  for mens', 299.00, 'Clothing', 'gym wear.webp', '2025-05-23 07:53:35', 5),
+(21, 16, 'men\'s kurtas', 'traditional kurtas for men', 999.00, 'Clothing', 'mens kurtas.webp', '2025-05-23 07:54:36', 10),
+(22, 16, 'collared t shirt', 'collared t shirt for men line pattern', 499.00, 'Clothing', 'line t shirt.webp', '2025-05-23 07:56:10', 0),
+(23, 16, 'trendy gym vests', 'trending gym wear', 299.00, 'Clothing', 'trendy gym vests.webp', '2025-05-23 07:57:09', 5),
+(24, 16, 'classic vests', 'classic vests for men', 399.00, 'Clothing', 'classic vests.webp', '2025-05-23 07:57:51', 5),
+(25, 16, 'mens t shirts', 'men t shirts', 999.00, 'Clothing', 'men tshirts.webp', '2025-05-23 07:59:25', 5),
+(26, 16, 'women frocks', 'one piece for womens', 299.00, 'Clothing', 'women frocks.webp', '2025-05-23 08:00:34', 2),
+(27, 16, 'one piece  dresses for womens', 'one piece', 799.00, 'Clothing', 'trendy 1 piece.webp', '2025-05-23 08:01:33', 5),
+(28, 16, 'stylish frocks', 'stylish frock for womens', 666.00, 'Clothing', 'stylish frock.webp', '2025-05-23 08:02:43', 5),
+(29, 16, 'women  skirts', 'women skirts', 800.00, 'Clothing', 'fashon skirts.webp', '2025-05-23 08:03:50', 5),
+(30, 16, 'jeans skirts', 'jeans skirts', 799.00, 'Clothing', 'jeans skirts.webp', '2025-05-23 08:04:43', 5),
+(31, 16, 'designer kurties', 'designer kurties for women', 1000.00, 'Clothing', 'designer kurtis.webp', '2025-05-23 08:05:57', 10),
+(32, 17, 'Silver Plated Necklace Set With White American Diamond', 'Silver Plated Necklace Set With White American Diamond', 450.00, 'Jewelry', 'Silver Plated Necklace Set With White American Diamond.webp', '2025-05-23 08:12:41', 5),
+(33, 17, 'Gold Plated Choker Set with Lct Austrian diamond', 'Gold Plated Choker Set with Lct Austrian diamond', 350.00, 'Jewelry', 'Gold Plated Choker Set with Lct Austrian diamond.webp', '2025-05-23 08:14:06', 7),
+(34, 17, 'Diva Fancy Diamond Gold-Plated Finish Jewellery Set', 'Diva Fancy Diamond Gold-Plated Finish Jewellery Set', 250.00, 'Jewelry', 'Diva Fancy Diamond Gold-Plated Finish Jewellery Set.webp', '2025-05-23 08:37:51', 5),
+(35, 17, 'Diva Fusion Jewellery Sets', 'Diva Fusion Jewellery Sets', 300.00, 'Jewelry', 'Diva Fusion Jewellery Sets.webp', '2025-05-23 08:40:38', 10),
+(36, 17, 'Chunky Silver American Diamond Free Size Rings', 'Chunky Silver American Diamond Free Size Rings', 220.00, 'Jewelry', 'Chunky Silver American Diamond Free Size Rings.webp', '2025-05-23 08:43:06', 7),
+(37, 17, 'Vassaley Rotating Cubic Zirconia Studded Adjustable Silver-Plated ring', 'Vassaley Rotating Cubic Zirconia Studded Adjustable Silver-Plated Flower Ring For Women And Girls', 150.00, 'Jewelry', 'Vassaley Rotating Cubic Zirconia Studded.webp', '2025-05-23 08:45:19', 5),
+(38, 17, 'R. Silver Adjustable Ring', 'R. Silver Adjustable Ring', 200.00, 'Jewelry', 'R. Silver Adjustable Ring.webp', '2025-05-23 08:46:17', 10),
+(39, 17, 'Jewellery for woman', 'Jewellery for woman', 320.00, 'Jewelry', 'Jewellery for woman.webp', '2025-05-23 08:47:33', 10),
+(40, 17, 'Stylish Chooda Bangles Set with Jhumki in Black Color', 'Stylish Chooda Bangles Set with Jhumki in Black Color', 400.00, 'Jewelry', 'Stylish Chooda Bangles Set with Jhumki in Black Color.webp', '2025-05-23 08:50:48', 10),
+(41, 17, 'Stylish Bangles Set', 'Stylish Bangles Set', 400.00, 'Jewelry', 'Stylish Bangles Set.webp', '2025-05-23 08:51:58', 10),
+(42, 17, 'Stylus Bangles Set-Yellow-10', 'Stylus Bangles Set-Yellow-10', 400.00, 'Jewelry', 'Stylus Bangles Set-Yellow-10.webp', '2025-05-23 08:53:44', 10),
+(43, 18, 'Chocolate Truffle Delicious Cake Half Kg', 'Chocolate Truffle Delicious Cake Half Kg', 450.00, 'Cakes', 'Chocolate Truffle Delicious Cake Half Kg.webp', '2025-05-23 08:59:40', 5),
+(44, 18, 'Fruit Overload Cake Half Kg', 'Fruit Overload Cake Half Kg', 500.00, 'Cakes', 'Fruit Overload Cake Half Kg.webp', '2025-05-23 09:01:05', 5),
+(45, 18, 'Butterscotch Bento Cake 250gm', 'Butterscotch Bento Cake 250gm', 450.00, 'Cakes', 'Butterscotch Bento Cake 250gm.webp', '2025-05-23 09:02:53', 10),
+(46, 18, 'Rose Paradise Chocolate Cake Half Kg', 'Rose Paradise Chocolate Cake Half Kg', 550.00, 'Cakes', 'rose-paradise-chocolate-cake-half-kg_2.webp', '2025-05-23 09:04:40', 10),
+(47, 18, 'Dates & Walnuts Mixed Dry Cake 500gms', 'Dates & Walnuts Mixed Dry Cake 500gms', 650.00, 'Cakes', 'dates-walnuts-mixed-dry-cake-500gms.webp', '2025-05-23 09:05:48', 5),
+(48, 18, 'Golden Delight Rasmalai Cake', 'Golden Delight Rasmalai Cake', 500.00, 'Cakes', 'golden-delight-rasmalai-cake.webp', '2025-05-23 09:09:05', 5),
+(49, 18, 'Creamy Mango Delight Cake', 'Creamy Mango Delight Cake', 500.00, 'Cakes', 'mango-mania-cream-cake-eggless_.webp', '2025-05-23 09:10:16', 5),
+(50, 18, 'Caramel Lotus Dreamscape', 'Caramel Lotus Dreamscape', 600.00, 'Cakes', 'caramel-lotus-dreamscape_1.webp', '2025-05-23 09:11:12', 10),
+(51, 18, 'Chocolate Rouge Reverie', 'Chocolate Rouge Reverie', 650.00, 'Cakes', 'chocolate-rouge-reverie_1.webp', '2025-05-23 09:12:19', 5),
+(52, 18, 'Black Forest Bento Cake 250 Gram', 'Black Forest Bento Cake 250 Gram', 600.00, 'Cakes', 'black-forest-bento-cake_1.webp', '2025-05-23 09:13:59', 10),
+(53, 18, 'Nutella Royale Cheesecake', 'Nutella Royale Cheesecake', 500.00, 'Cakes', 'nutella-royale-cheesecake_1.webp', '2025-05-23 09:15:39', 5),
+(54, 18, 'Chocolate Trio Cream Cake- Half Kg', 'Chocolate Trio Cream Cake- Half Kg', 600.00, 'Cakes', 'chocolate-trio-cream-cake-half-kg_1.webp', '2025-05-23 09:18:15', 5),
+(55, 19, 'Analog Square Dial Watch', 'Analog Square Dial Watch', 400.00, 'Accessories', 'Analog Square Dial Watch.webp', '2025-05-23 09:25:15', 5),
+(56, 19, 'Midnight Blue Dial & Silicon Mesh Strap with Water Resistant', 'Midnight Blue Dial & Silicon Mesh Strap with Water Resistant', 600.00, 'Accessories', 'Midnight Blue Dial & Silicon Mesh Strap with Water Resistant.webp', '2025-05-23 09:27:44', 10),
+(57, 19, 'NEW LOOK-SUN \\PACK OF 1', 'NEW LOOK-SUN \\PACK OF 1', 999.00, 'Accessories', 'PACK OF 1.webp', '2025-05-23 09:30:14', 10),
+(58, 19, 'Unisex Silver Metal Oval Sunglasses', 'Unisex Silver Metal Oval Sunglasses', 600.00, 'Accessories', 'Unisex Silver Metal Oval Sunglasses.webp', '2025-05-23 09:31:30', 10),
+(59, 19, 'Shehriz Eyewear Men Gold Metal Rectangular', 'Shehriz Eyewear Men Gold Metal Rectangular', 600.00, 'Accessories', 'Shehriz Eyewear Men Gold Metal Rectangular.webp', '2025-05-23 09:32:45', 5),
+(60, 19, 'Women Brown Carbon fiber Square , UV Protected Sunglasses', 'Women Brown Carbon fiber Square , UV Protected Sunglasses', 700.00, 'Accessories', 'Women Brown Carbon fiber Square , UV Protected Sunglasses.webp', '2025-05-23 09:34:51', 10),
+(61, 19, 'New Trending Imported Premium Men & Women Sunglasses', 'New Trending Imported Premium Men & Women Sunglasses', 700.00, 'Accessories', 'New Trending Imported Premium Men & Women Sunglasses.webp', '2025-05-23 09:37:07', 10),
+(62, 19, 'Boys and Men\'s Exclusive Brown black Boys watch', 'Boys and Men\'s Exclusive Brown black Boys watch', 500.00, 'Accessories', 'Boys and Men\'s Exclusive Brown black Boys watch.webp', '2025-05-23 09:38:17', 10),
+(63, 19, 'Trendy Analog Men\'s Watch', 'Trendy Analog Men\'s Watch', 700.00, 'Accessories', 'Trendy Analog Men\'s Watch.webp', '2025-05-23 09:39:18', 5),
+(64, 19, 'Men Multicolor Leather Formal Watches', 'Men Multicolor Leather Formal Watches', 700.00, 'Accessories', 'Men Multicolor Leather Formal Watches.webp', '2025-05-23 09:40:24', 10);
 
 -- --------------------------------------------------------
 
@@ -158,18 +172,12 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`) VALUES
-(2, 'Harish Patil', 'harish938035@gmail.com', '$2y$10$pMnlC/vSK/ZJCuj7jWGW.OLSxNo5UeP5gI7FCm18zuXfK9c8ga.qi', 'buyer', '2025-04-09 13:00:15'),
-(3, 'tjtaruk', 'taruk@gmail.com', '$2y$10$YBwzvIRL7Ig84ZNA04IH6Oj1xJdK0Fe4By5Wa5NZAdgSSBFYI2kzi', 'seller', '2025-04-11 15:22:04'),
-(4, 'Varun Billur', 'varunbillur@gmail.com', '$2y$10$48UKqZxLgo4so9qWaiiHYe.oAFh.hETsrOumhfpytEbIMw4bPC5ZC', 'admin', '2025-04-17 11:05:46'),
-(5, 'manju', 'manju123@gmail.com', '$2y$10$TUSQLZkODKkAhiVPSNVHHuK2P1FBoI9pNe1/BDzq18KasvlEnsQHi', 'buyer', '2025-04-26 07:48:34'),
-(6, 'sonu', 'sonu@gmail.com', '$2y$10$a9pL40dw94XAM8gcz/511OjnIpWFG/UA.i.7z3UAAgcCM.jFQgbaO', 'buyer', '2025-05-03 07:20:25'),
-(7, 'amit', 'amit@gmail.com', '$2y$10$IQ1kETJiXGtFMRvPIqslzuZvwBYyejZ5FIYW5mM37MOYMXjYVDFSu', 'seller', '2025-05-03 07:21:13'),
-(8, 'hari', 'hari@gmail.com', '$2y$10$3bjDxPuEiTiUBYsm4AxZBu1nYY17Ck..OJh8dR/1Yf.v3LP0k7kaa', 'seller', '2025-05-03 07:23:02'),
-(9, 'megha', 'megha@gmail.com', '$2y$10$tuqvLcY6TsY1JcFUtNBuUeImhvKDN2.gtyVTCCMhPsVV3mZNNB4SC', 'buyer', '2025-05-03 07:28:33'),
-(10, 'Rani', 'rani@gmail.com', '$2y$10$wlDp0/6UfeWl8G1wxcJHz.JS5JHNVmjR7TIr0lKZoK0BYFYpTTXV6', 'seller', '2025-05-04 16:19:56'),
-(11, 'faruk', 'faruk@gmail.com', '$2y$10$MjrIZZtMsd2uAJn9BaD4AOTqo/Q0c4dSDE8pX0rZGj6aw3UYJhJB6', 'seller', '2025-05-12 15:50:59'),
-(12, 'Manju Pujari', 'Manju@gmail.com', '$2y$10$3VCgyuJnfq6kaVCp7he..u4xzjaYpn2dsCyNkfcQ7jnOlq7oZjBIa', 'seller', '2025-05-14 05:19:41'),
-(13, 'Laxmi', 'laxmi@gmail.com', '$2y$10$Mw4auiiYLR9cZ9.0UyUEbeudDAcBd8Uzxh4NzvYokHfM9/b98/ysq', 'buyer', '2025-05-14 05:23:14');
+(14, 'Harish Patil', 'harish@gmail.com', '$2y$10$nAraEaCMKHKdFZfMuznP/.SNIaYTpwAtzyBo8wjVXfU7g3rT2kExi', 'admin', '2025-05-23 07:24:57'),
+(15, 'Daneshwari Savadi', 'danu@gmail.com', '$2y$10$Uo8Mh86VSHat7FmEKHhpeu4r9JDOEit8ouJpeSXWWThnCLIT426me', 'buyer', '2025-05-23 07:27:47'),
+(16, 'Tarukh Jagiradar', 'tarukh@gmail.com', '$2y$10$xDOOWd60s3Zb75gYHK/vSu7GQfB3V4ISfKdcrfvV7LNHXvm2u55X2', 'seller', '2025-05-23 07:32:10'),
+(17, 'laxmi more', 'laxmi@gmail.com', '$2y$10$ACGGuLT6/gPqUGxxjEeJ.uFUyZcDqpfcreAD6HDrQyP5gbWJO8YgK', 'seller', '2025-05-23 08:07:44'),
+(18, 'Kavana badiger', 'kavana@gmail.com', '$2y$10$FpkqCNGotcsc8bUT25r4c.GLXk8cwy33gaD4QK2iFnTrikvUYy/la', 'seller', '2025-05-23 08:56:34'),
+(19, 'Somesh', 'somesh@gmail.com', '$2y$10$VpoMv3TpgHapC3UO8S/G7OLZVEzz2xYbl9OcKRe7vqJPoK.eYV0KW', 'seller', '2025-05-23 09:19:27');
 
 --
 -- Indexes for dumped tables
@@ -218,7 +226,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
@@ -230,19 +238,19 @@ ALTER TABLE `contact_messages`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Constraints for dumped tables

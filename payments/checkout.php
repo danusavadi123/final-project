@@ -1,87 +1,138 @@
 <?php
 session_start();
 require_once('../config/db.php');
-require_once('../vendor/autoload.php'); // Razorpay PHP SDK
+require_once('../vendor/autoload.php'); // Razorpay SDK
 
 use Razorpay\Api\Api;
 
-// Check if razorpay_order and phone exist in session
-if (
-    !isset($_SESSION['razorpay_order']) ||
-    !isset($_SESSION['razorpay_order']['total_amount']) ||
-    !isset($_SESSION['phone'])
-) {
-    // Optional: clear session data to avoid looping
-    unset($_SESSION['razorpay_order']);
-    unset($_SESSION['razorpay_order_id']);
-    exit;
+if (!isset($_SESSION['checkout_data'])) {
+    die("Session expired. Please try placing the order again.");
 }
 
-$razorpayData = $_SESSION['razorpay_order'];
-$totalAmount = (int) $razorpayData['total_amount'] * 100; // Razorpay uses paise
+$data = $_SESSION['checkout_data'];
+$orders = $data['orders'];
+$buyer_id = $data['buyer_id'];
+$address = $data['address'];
+$contact = $data['contact_number'];
+$order_status = $data['order_status'];
+$order_date = $data['order_date'];
+$expected_delivery = $data['expected_delivery'];
+$payment_method = $data['payment_method'];
+$single_order = $data['single_order'];
 
-// Razorpay credentials (use env or config ideally)
-$apiKey = 'rzp_test_ODxanSFZcvxcbR';
-$apiSecret = 'HlRYDe9RT6QqwBch2BTAMSUF';
+// Razorpay credentials
+$api_key = 'rzp_test_ODxanSFZcvxcbR';
+$api_secret = 'HlRYDe9RT6QqwBch2BTAMSUF';
 
-// Create Razorpay API instance
-$api = new Api($apiKey, $apiSecret);
+$api = new Api($api_key, $api_secret);
 
-// Try creating the Razorpay order
-try {
-    $razorpayOrder = $api->order->create([
-        'receipt' => 'ORDER_' . rand(1000, 9999),
-        'amount' => $totalAmount,
-        'currency' => 'INR',
-        'payment_capture' => 1
-    ]);
+// If Razorpay response is received
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['razorpay_payment_id'])) {
+    $payment_id = $_POST['razorpay_payment_id'];
 
-    $_SESSION['razorpay_order_id'] = $razorpayOrder['id'];
+    try {
+        $payment = $api->payment->fetch($payment_id);
 
-} catch (Exception $e) {
-    // Handle API error gracefully
-    echo "<script>alert('Failed to initialize payment. Please try again.'); window.location.href='../checkout/fallback.php';</script>";
-    exit;
+        // Capture the payment if it's authorized
+        if ($payment->status === 'authorized') {
+            $payment->capture(['amount' => $payment['amount']]);
+            $payment = $api->payment->fetch($payment_id); // Refresh status after capture
+        }
+
+        if ($payment->status === 'captured') {
+            // Insert orders
+            foreach ($orders as $order) {
+                $stmt = mysqli_prepare($conn, "INSERT INTO orders (product_id, seller_id, buyer_id, quantity, total_amount, address, order_status, order_date, expected_delivery, payment_method, payment_id, contact_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                mysqli_stmt_bind_param($stmt, 'iiiidsssssss',
+                    $order['product_id'],
+                    $order['seller_id'],
+                    $buyer_id,
+                    $order['quantity'],
+                    $order['total_amount'],
+                    $address,
+                    $order_status,
+                    $order_date,
+                    $expected_delivery,
+                    $payment_method,
+                    $payment_id,
+                    $contact
+                );
+                mysqli_stmt_execute($stmt);
+            }
+
+            if (!$single_order) {
+                mysqli_query($conn, "DELETE FROM cart WHERE buyer_id = $buyer_id");
+            }
+
+            unset($_SESSION['checkout_data']);
+            echo "<script>
+                alert('🎉 Order placed successfully!');
+                window.location.href = '../buyer/order_history.php';
+            </script>";
+            exit;
+        } else {
+            echo "<script>alert('Payment not captured. Please try again.'); window.location.href = '../buyer/dashboard.php';</script>";
+            exit;
+        }
+    } catch (Exception $e) {
+        echo "<script>alert('Error verifying payment: " . $e->getMessage() . "'); window.location.href = '../buyer/dashboard.php';</script>";
+        exit;
+    }
 }
 
-// Safe HTML encoding
-function h($str) {
-    return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+// Otherwise, display Razorpay checkout
+$total_amount = 0;
+foreach ($orders as $order) {
+    $total_amount += $order['total_amount'];
 }
-
+$total_amount_in_paisa = $total_amount * 100;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Redirecting to Razorpay...</title>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <meta charset="UTF-8">
+  <title>Checkout - Razorpay</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
-<body>
-    <script>
-        const options = {
-            "key": "<?= h($apiKey) ?>",
-            "amount": "<?= h($totalAmount) ?>",
-            "currency": "INR",
-            "name": "Bazaar E-commerce",
-            "description": "Order Payment",
-            "image": "https://yourdomain.com/logo.png", // Optional logo
-            "order_id": "<?= h($razorpayOrder['id']) ?>",
-            "handler": function (response) {
-                // On successful payment
-                window.location.href = "./verify.php?payment_id=" + response.razorpay_payment_id;
-            },
-            "prefill": {
-                "name": "<?= h($_SESSION['username'] ?? 'Customer') ?>",
-                "email": "<?= h($_SESSION['email'] ?? 'test@example.com') ?>",
-                "contact": "<?= h($_SESSION['phone']) ?>"
-            },
-            "theme": {
-                "color": "#3182bd"
-            }
-        };
-        const rzp = new Razorpay(options);
-        rzp.open();
-    </script>
+<body onload="startRazorpay()">
+
+<script>
+function startRazorpay() {
+    var options = {
+        "key": "<?= $api_key ?>",
+        "amount": "<?= $total_amount_in_paisa ?>",
+        "currency": "INR",
+        "name": "Your Shop Name",
+        "description": "Order Payment",
+        "handler": function (response){
+            // Submit form with payment ID
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '';
+
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'razorpay_payment_id';
+            input.value = response.razorpay_payment_id;
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+        },
+        "prefill": {
+            "name": "<?= $_SESSION['username'] ?? '' ?>",
+            "email": "<?= $_SESSION['email'] ?? '' ?>",
+            "contact": "<?= $contact ?>"
+        },
+        "theme": {
+            "color": "#3182bd"
+        }
+    };
+    var rzp = new Razorpay(options);
+    rzp.open();
+}
+</script>
+
 </body>
 </html>

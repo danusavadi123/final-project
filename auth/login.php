@@ -168,6 +168,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
   </style>
 </head>
+<?php if (isset($_SESSION['success'])): ?>
+  <script>
+    window.onload = function() {
+      alert("<?= $_SESSION['success']; ?>");
+    };
+  </script>
+  <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
 <body>
 
     <div class="form-box">
@@ -187,6 +195,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       </div>
     </div>
   </div>
+<?php if (isset($_SESSION['success'])): ?>
+  <script>
+    window.onload = function() {
+      alert("<?= $_SESSION['success']; ?>");
+    };
+  </script>
+  <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+</body>
 
 </body>
 </html>
